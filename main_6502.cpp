@@ -2,8 +2,8 @@
  **************************************************************************************************************************
  * Zachary Hansen Terry: zmht25@gmail.com * https://zmht25.ddns.net/                                                      *
  *                                                                                                                        *
- * This is the 6502 emulator. I made it by watching a tutorial on youtube: https://www.youtube.com/watch?v=qJgsuQoy9bc 
- * Also I used this: http://www.obelisk.me.uk/6502/ resource a lot.   *
+ * This is the 6502 emulator. I made it by watching a tutorial on youtube: https://www.youtube.com/watch?v=qJgsuQoy9bc    *
+ * Also I used this: http://www.obelisk.me.uk/6502/ resource a lot.                                                       *
  **************************************************************************************************************************
 */
 
@@ -11,11 +11,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+using Byte = unsigned char; //A unsigned char is 8 bits
+using Word = unsigned short; //A unsigned char is 16 bits. Perfec!
+using u32 = unsigned int; //
+
+// A class to represent the memory that the computer needs
+struct Mem
+{
+    static constexpr u32 MAX_MEM = 1024 * 64;
+    Byte Data[MAX_MEM];
+
+    // Sets all of the memory adresses to 0.
+    void initialise()
+    {
+        for (u32 i = 0; i < MAX_MEM; i++){
+            Data[i] = 0;
+        }
+    }
+
+    // Reads on byte from memory.
+    Byte operator[](u32 Address) const
+    {
+        // Adress has to be less than MAX_MEM
+        return Data[Address];
+    }
+};
+
+
 // The CPU class. Has Byte and Word data types. Has Registers, Program Counter, Stack Pointer.
 struct CPU
 {
-    using Byte = unsigned char; //A unsigned char is 8 bits
-    using Word = unsigned short; //A unsigned char is 16 bits. Perfec!
+    
 
     Word PC; // The program counter tells you what the next program to run is (16 bit)
     Word SP; // The stack pointer is a 16 bit piece of information that tells you where you were on the 
@@ -31,17 +57,33 @@ struct CPU
     Byte V : 1; // Overflow Flag
     Byte N : 1; // Negative Flag
 
-    void reset()
+    // Resests the CPU and inits the memory.
+    void reset(Mem& memory)
     {
         PC = 0xFFFC; // Sets the program counter to $FFFC.
         SP = 0x0100; // Sets the Stack Pointer to $0x0100.
-        D = 0;
-
-        A = 0;
-        X = 0;
-        Y = 0;
+        C = Z = I = D = B = V = N = 0; // Sets the flags to 0.
+        A = X = Y = 0; // Sets the A, X, and Y registers to 0.
+       memory.initialise();
     }
 
+    // Fetches a byte of data from the memory.
+    Byte FetchByte(u32& Cycles, Mem& memory)
+    {
+        Byte Data = memory[PC];
+        PC++;
+        Cycles--;
+        return Data;
+    }
+
+
+    void execute(u32 Cycles, Mem& memory)
+    {
+        while(Cycles > 0)
+        {
+            Byte Ins = FetchByte(Cycles, memory);
+        }
+    }
 };
 
 
@@ -49,7 +91,10 @@ struct CPU
 
 int main()
 {
+    Mem mem;
     CPU cpu;
-    cpu.reset();
+    cpu.reset(mem);
+    cpu.execute(2, mem);
+
     return 0;
 }
