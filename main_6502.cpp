@@ -35,6 +35,13 @@ struct Mem
         // Adress has to be less than MAX_MEM
         return Data[Address];
     }
+
+    // Writes on byte to memory.
+    Byte& operator[](u32 Address) 
+    {
+        // Adress has to be less than MAX_MEM
+        return Data[Address];
+    }
 };
 
 
@@ -76,12 +83,29 @@ struct CPU
         return Data;
     }
 
+    // Op Codes
+    static constexpr Byte INS_LDA_IM = 0xA9; //Load A immediate mode.
 
     void execute(u32 Cycles, Mem& memory)
     {
         while(Cycles > 0)
         {
-            Byte Ins = FetchByte(Cycles, memory);
+            Byte Ins = FetchByte(Cycles, memory);  // Uses Fetch
+            switch (Ins)
+            {
+            case INS_LDA_IM:
+            {
+                Byte Value = FetchByte(Cycles, memory);
+                A = Value;
+                Z = (A == 0);
+                N = (A & 0b10000000) > 0;
+            } break;
+            default:
+            {
+                printf("Instruction not handled %d", Ins);
+            } break;
+                
+            }
         }
     }
 };
@@ -94,7 +118,10 @@ int main()
     Mem mem;
     CPU cpu;
     cpu.reset(mem);
+    // A little program (start)
+    mem[0xFFFC] = CPU::INS_LDA_IM;
+    mem[0xFFFD] = 0x42;
+    // End of a little program
     cpu.execute(2, mem);
-
     return 0;
 }
