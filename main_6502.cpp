@@ -144,7 +144,7 @@ int main()
     mem[0xFFFC] = CPU::INS_LDA_ZP;
     mem[0xFFFD] = 0x42;
     // End of a little inline program
-    
+    std::cout << &mem[0xFFCD];
     cpu.execute(2, mem);
     return 0;
 }
