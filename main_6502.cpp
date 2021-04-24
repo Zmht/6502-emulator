@@ -83,6 +83,14 @@ struct CPU
         return Data;
     }
 
+    Word FetchWord (u32& Cycles, Mem& memory)
+    {
+        Word Data = memory[PC];
+        PC++;
+        Cycles--;
+        return Data;
+    }
+
     Byte ReadByte(u32& Cycles, Byte Address, Mem& memory)
     {
         Byte Data = memory[Address];
@@ -93,7 +101,10 @@ struct CPU
     // Op Codes
     static constexpr Byte 
         INS_LDA_IM = 0xA9, //Load A immediate mode.
-        INS_LDA_ZP = 0xA5;
+        INS_LDA_ZP = 0xA5, //Load A Zero Page
+        INS_LDA_ZPX = 0xB5, //Load A ZeroPage X
+
+        INS_JSR = 0x20; //Jump to Sub routine
 
     void LDASetStatus()
     {
@@ -121,6 +132,18 @@ struct CPU
                 LDASetStatus();
 
             } break;
+            case INS_LDA_ZPX:
+            {
+                Byte ZeroPageAddress = FetchByte(Cycles, memory);
+                ZeroPageAddress += X;
+                Cycles--;
+                A = ReadByte(Cycles, ZeroPageAddress, memory);
+                LDASetStatus();
+            } break;
+            case INS_JSR:
+            {
+
+            }
             default:
             {
                 printf("Instruction not handled %d", Ins);
@@ -143,8 +166,8 @@ int main()
     // A little inline program (start)
     mem[0xFFFC] = CPU::INS_LDA_ZP;
     mem[0xFFFD] = 0x42;
+    mem[0x0043] = 0x84;
     // End of a little inline program
-    std::cout << &mem[0xFFCD];
-    cpu.execute(2, mem);
+    cpu.execute(3, mem);
     return 0;
 }
