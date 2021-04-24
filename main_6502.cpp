@@ -83,8 +83,23 @@ struct CPU
         return Data;
     }
 
+    Byte ReadByte(u32& Cycles, Byte Address, Mem& memory)
+    {
+        Byte Data = memory[Address];
+        Cycles--;
+        return Data;
+    }
+
     // Op Codes
-    static constexpr Byte INS_LDA_IM = 0xA9; //Load A immediate mode.
+    static constexpr Byte 
+        INS_LDA_IM = 0xA9, //Load A immediate mode.
+        INS_LDA_ZP = 0xA5;
+
+    void LDASetStatus()
+    {
+        Z = (A == 0);
+        N = (A & 0b10000000) > 0;
+    }
 
     void execute(u32 Cycles, Mem& memory)
     {
@@ -97,8 +112,14 @@ struct CPU
             {
                 Byte Value = FetchByte(Cycles, memory);
                 A = Value;
-                Z = (A == 0);
-                N = (A & 0b10000000) > 0;
+                LDASetStatus();
+            } break;
+            case INS_LDA_ZP:
+            {
+                Byte ZeroPageAddress = FetchByte(Cycles, memory);
+                A = ReadByte(Cycles, ZeroPageAddress, memory);
+                LDASetStatus();
+
             } break;
             default:
             {
@@ -118,10 +139,12 @@ int main()
     Mem mem;
     CPU cpu;
     cpu.reset(mem);
-    // A little program (start)
-    mem[0xFFFC] = CPU::INS_LDA_IM;
+
+    // A little inline program (start)
+    mem[0xFFFC] = CPU::INS_LDA_ZP;
     mem[0xFFFD] = 0x42;
-    // End of a little program
+    // End of a little inline program
+    
     cpu.execute(2, mem);
     return 0;
 }
