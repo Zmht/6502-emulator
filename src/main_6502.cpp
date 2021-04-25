@@ -38,7 +38,10 @@ struct Mem
         }
     }
 
-    /// Reads one byte from memory.
+    /**
+     * Reads one byte from memory.
+     * @param Address
+     */
     Byte operator[](u32 Address) const
     {
         /// Adress has to be less than MAX_MEM
@@ -75,7 +78,10 @@ struct CPU
     Byte V : 1; ///<  Overflow Flag
     Byte N : 1; ///<  Negative Flag
 
-    ///  Resests the CPU and inits the memory.
+    /**
+     * Resests the CPU and inits the memory.
+     * @param Memory
+     */
     void reset(Mem &memory)
     {
         /// Sets the program counter to $FFFC.
@@ -89,7 +95,11 @@ struct CPU
         memory.initialise();
     }
 
-    ///  Fetches a byte of data from the memory.
+    /**
+     * Fetches a byte of data from the memory.
+     * @param Cycles
+     * @param Memory
+     */ 
     Byte FetchByte(u32 &Cycles, Mem &memory)
     {
         Byte Data = memory[PC];
@@ -98,7 +108,11 @@ struct CPU
         return Data;
     }
 
-    ///Fetches a word (16 bits)from memory
+    /**
+     * Fetches a word (16 bits)from memory
+     * @param Cycles
+     * @param Memory
+     */
     Word FetchWord(u32 &Cycles, Mem &memory)
     {
         Word Data = memory[PC];
@@ -107,7 +121,12 @@ struct CPU
         return Data;
     }
 
-    ///Reads a byte from memory
+    /**
+     * Reads a byte from memory
+     * @param Cycles 
+     * @param Address
+     * @param memory
+     */
     Byte ReadByte(u32 &Cycles, Byte Address, Mem &memory)
     {
         Byte Data = memory[Address];
