@@ -9,7 +9,8 @@ cd 6502-emulator
 mkdir build  
 cd build  
 cmake ../   
-make```
+make
+```
 
 
 Make the documentation ex:  
